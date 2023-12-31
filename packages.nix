@@ -13,7 +13,6 @@ in {
     pkgs.topgrade
     pkgs.tmux # Terminal multiplexer
     pkgs.xdg-utils # cli tools for desktop stuff
-    pkgs.keychain # manage GPG and SSH keys (multiple github accounts)
     pkgs.eslint_d # linting, but with faster d
 
     pkgs.bottom # Like top but at the bottom
