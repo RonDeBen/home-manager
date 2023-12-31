@@ -1,0 +1,17 @@
+# Nix result symlinks
+result*
+result-*
+
+# Nix store paths
+/nix/store
+
+# Temporary files
+*~
+.DS_Store
+
+# User-specific files
+.local-settings.nix
+
+# Build artifacts
+/result
+
