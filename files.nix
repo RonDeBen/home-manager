@@ -211,27 +211,6 @@
             }
       '';
     };
-
-    "orient_monitors" = {
-      executable = true;
-      target = ".local/bin/orient_monitors.sh";
-      text = ''
-        # Rotate the left monitor (DP-2-3) to portrait
-        xrandr --output DP-2-3 --rotate left --auto
-
-        # Place it to the left of the central monitor (DP-2-2)
-        xrandr --output DP-2-3 --left-of DP-2-2 --auto
-
-        # Make sure the central monitor (DP-2-2) is in landscape
-        xrandr --output DP-2-2 --rotate normal --auto
-
-        # Place the central monitor above the primary monitor (eDP-1)
-        xrandr --output DP-2-2 --above eDP-1 --auto
-
-        # Make sure the primary monitor (eDP-1) is in landscape and set as primary
-        xrandr --output eDP-1 --rotate normal --primary --auto
-      '';
-    };
   };
 
 }

@@ -25,28 +25,13 @@ in {
   home = {
     username = "ron.debenedetti";
     homeDirectory = "/home/ron.debenedetti/";
-    sessionPath = [ "/opt/firefox" ];
+    #sessionPath = [ "/opt/firefox" ];
   };
+
   home.sessionVariables = {
-    # BROWSER = "/usr/bin/firefox -new-tab";
-    BROWSER = "/usr/bin/firefox";
+    BROWSER = "/home/ron.debenedetti/.nix-profile/bin/firefox";
     EDITOR = "nvim";
   };
-
-  # home.sessionVariables = {
-  #   DISPLAY_MANAGER_SESSION = "none+i3";
-  # };
-
-  # home.activation.setXDGbrowser = dag.entryBefore [ "linkGeneration" ] ''
-  #    xdg-settings set default-web-browser firefox.desktop
-  # '';
-
-  # home.activation.setXDGbrowser = let
-  #   script = ''
-  #     unset BROWSER
-  #     ${pkgs.xdg-utils}/bin/xdg-settings set default-web-browser firefox.desktop
-  #   '';
-  # in dag.entryBefore [ "linkGeneration" ] script;
 
   # You should not change this value, even if you update Home Manager. If you do
   # want to update the value, then make sure to first check the Home Manager
