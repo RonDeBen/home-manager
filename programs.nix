@@ -97,7 +97,7 @@ in {
           style = "Regular";
         };
         size = 11.0;
-        draw_bold_text_with_bright_colors = true;
+        #draw_bold_text_with_bright_colors = true;
       };
       colors = {
         primary = {
@@ -137,12 +137,11 @@ in {
     enable = true;
     userName = "Ron DeBenedetti";
     userEmail = "ron.debenedetti@praeses.com";
+    difftastic.enable = true;
 
     extraConfig = {
-      commit = {
-        gpgSign = "true";
-        user.signingKey = "~/.ssh/id_ed25519.pub";
-      };
+      commit = { gpgSign = "true"; };
+      user = { signingKey = "F2B5049310B0CB9E"; };
       color = {
         ui = "auto";
         branch = {
@@ -242,6 +241,7 @@ in {
     enable = true;
     shellAliases = {
       ls = "eza --group-directories-first";
+      # røk = "rok";
       pn = "pnpm";
       vpn =
         "sudo openconnect --background --protocol=gp vpn.praeses.com; and echo 'restarting sssd'; and sudo systemctl restart sssd";
@@ -249,33 +249,52 @@ in {
       rook = "~/projects/rook/tools/rook";
     };
     shellInit = ''
-      set -gx PATH $PATH $HOME/.yarn/bin $HOME/.cargo/bin
-      set -gx SHELL ${pkgs.fish}/bin/fish
-      set -gx PATH /home/ron.debenedetti/.local/bin $PATH
-      set -gx PATH /home/ron.debenedetti/.local/share/pnpm $PATH
+          # Start ssh-agent if it's not already running
+      if not pgrep -u $USER ssh-agent > /dev/null
+          eval $(ssh-agent -s)
+          set -x SSH_AUTH_SOCK $SSH_AUTH_SOCK
+      end
 
-      # Monokai Fish shell theme
-      set -g fish_color_normal F8F8F2 # the default color
-      set -g fish_color_command A6E22E # the color for valid commands (changed to green)
-      set -g fish_color_quote E6DB74 # the color for quoted blocks of text
-      set -g fish_color_redirection AE81FF # the color for IO redirections
-      set -g fish_color_end F8F8F2 # the color for process separators like ';' and '&'
-      set -g fish_color_error F92672 --background=default # the color for errors (changed to red)
-      set -g fish_color_param A6E22E # the color for regular command parameters
-      set -g fish_color_comment 75715E # the color used for code comments
-      set -g fish_color_match F8F8F2 # the color used to highlight matching parenthesis15
-      set -g fish_color_search_match --background=49483E # the color used to highlight history search matches
-      set -g fish_color_operator AE81FF # the color for parameter expansion operators like '*' and '~'
-      set -g fish_color_escape 66D9EF # the color used to highlight character escapes like '\n' and '\x70'
-      set -g fish_color_cwd 66D9EF # the color used for the current working directory in the default prompt
+      # Add the key using keychain
+      if test -z "$SSH_AUTH_SOCK"
+          eval (keychain --eval --agents ssh ~/.ssh/id_ed25519)
+      end
 
-      # Completion Pager Colors
-      set -g fish_pager_color_prefix F8F8F2 # the color of the prefix string, i.e. the string that is to be completed
-      set -g fish_pager_color_completion 75715E # the color of the completion itself
-      set -g fish_pager_color_description 49483E # the color of the completion description
-      set -g fish_pager_color_progress F8F8F2 # the color of the progress bar at the bottom left corner
-      set -g fish_pager_color_secondary F8F8F2 # the background color of the every second completion
+
+        set -gx PNPM_HOME /home/ron.debenedetti/.local/share/pnpm
+        set -gx PATH $PNPM_HOME/bin $HOME/.local/bin $HOME/.yarn/bin $HOME/.cargo/bin $PATH
+        set -gx SHELL ${pkgs.fish}/bin/fish
+        set -gx PATH $HOME/.nix-profile/bin $PATH
+        set -gx PATH /home/ron.debenedetti/.nix-profile/bin $PATH
+        set -gx PATH /usr/bin $PATH
+
+        # Monokai Fish shell theme
+        set -g fish_color_normal F8F8F2 # the default color
+        set -g fish_color_command A6E22E # the color for valid commands (changed to green)
+        set -g fish_color_quote E6DB74 # the color for quoted blocks of text
+        set -g fish_color_redirection AE81FF # the color for IO redirections
+        set -g fish_color_end F8F8F2 # the color for process separators like ';' and '&'
+        set -g fish_color_error F92672 --background=default # the color for errors (changed to red)
+        set -g fish_color_param A6E22E # the color for regular command parameters
+        set -g fish_color_comment 75715E # the color used for code comments
+        set -g fish_color_match F8F8F2 # the color used to highlight matching parenthesis15
+        set -g fish_color_search_match --background=49483E # the color used to highlight history search matches
+        set -g fish_color_operator AE81FF # the color for parameter expansion operators like '*' and '~'
+        set -g fish_color_escape 66D9EF # the color used to highlight character escapes like '\n' and '\x70'
+        set -g fish_color_cwd 66D9EF # the color used for the current working directory in the default prompt
+
+        # Completion Pager Colors
+        set -g fish_pager_color_prefix F8F8F2 # the color of the prefix string, i.e. the string that is to be completed
+        set -g fish_pager_color_completion 75715E # the color of the completion itself
+        set -g fish_pager_color_description 49483E # the color of the completion description
+        set -g fish_pager_color_progress F8F8F2 # the color of the progress bar at the bottom left corner
+        set -g fish_pager_color_secondary F8F8F2 # the background color of the every second completion
     '';
     functions = { gi = "curl -sL https://www.gitignore.io/api/$argv"; };
   };
+
+  # programs.neovim = {
+  #     enable = true;
+  #     plugins = [ pkgs.vimPlugins.nvim-treesitter.withAllGrammers];
+  # };
 }

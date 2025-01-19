@@ -1,149 +1,192 @@
 { pkgs, ... }:
 
-let nerd-fonts = pkgs.callPackage ./nerdfonts { };
+let
+  nerd-fonts = pkgs.callPackage ./nerdfonts { };
+
+  nixGL = import <nixgl> { };
+
+  # Define the wrapper function for applications requiring nixGL
+  nixGLWrap = pkg:
+    let
+      bin = "${pkg}/bin";
+      executables = builtins.attrNames (builtins.readDir bin);
+      wrappedPkg = pkgs.buildEnv {
+        name = "nixGL-${pkg.name}";
+        paths = [ pkg ] ++ map (name:
+          pkgs.hiPrio (pkgs.writeShellScriptBin name ''
+            exec -a "$0" ${nixGL.nixGLIntel}/bin/nixGLIntel ${bin}/${name} "$@"
+          '')) executables;
+      };
+    in wrappedPkg // { inherit (pkg) version; };
 
 in {
+  nixpkgs.overlays = [ (import ./configs/overlays/gifine/gifine.nix) ];
+
   # The home.packages option allows you to install Nix packages into your
   # environment.
-  home.packages = [
+  home.packages = with pkgs; [
+    vlc
+    tree-sitter
+
+    # gifsicle #for optimizing gifs
+    # ffmpeg # for creating mp4 and recording desktop
+    # graphicsmagick #for creating gifs
+    # slop # needed to select an area for screen recording
+    # gifine # make gifs from screen recordings
     # Custom Fonts
     nerd-fonts
 
     # CLI Tools
-    pkgs.topgrade
-    pkgs.tmux # Terminal multiplexer
-    pkgs.xdg-utils # cli tools for desktop stuff
-    pkgs.eslint_d # linting, but with faster d
+    qdirstat # like windirstat, but for linux
+    minio-client # a client for minio (duh)
+    miller # a jq-like utility for CSV files
+    topgrade
+    tmux # Terminal multiplexer
+    xdg-utils # cli tools for desktop stuff
+    tree # show directory tree
+    keychain # password manager
 
-    pkgs.bottom # Like top but at the bottom
-    pkgs.curl # it's curl.  I use this to demo NIX
-    pkgs.devspace # local development against k8s
-    pkgs.direnv # auto load .envrc file per dir
-    pkgs.docker-compose # run multiple containers with docker
-    pkgs.du-dust # find large files in a directory
-    pkgs.eza # new ls command written in rust
-    pkgs.fd # alternative to find written in rust
-    pkgs.fluxcd # gitops cli
-    pkgs.freerdp # remote desktop tool to connect to windows
-    pkgs.frei # view free memory
-    pkgs.fzf # general purpose fuzzy finder, used with many other tools
-    pkgs.glab # command line client for gitlab
-    pkgs.httpie # cli alternative for PostMAN
-    pkgs.k6 # load tester which can run on k8s
-    pkgs.k9s # tui to communicate with k8s
-    pkgs.krew # k8s tool to install k8s packages
+    bottom # Like top but at the bottom
+    curl # it's curl.  I use this to demo NIX
+    devspace # local development against k8s
+    direnv # auto load .envrc file per dir
+    # docker-compose # run multiple containers with docker
+    du-dust # find large files in a directory
+    eza # new ls command written in rust
+    fd # alternative to find written in rust
+    # fluxcd # gitops cli
+    # freerdp # remote desktop tool to connect to windows
+    frei # view free memory
+    fzf # general purpose fuzzy finder, used with many other tools
+    glab # command line client for gitlab
+    httpie # cli alternative for PostMAN
+    #pkgs.k6 # load tester which can run on k8s
+    #pkgs.k9s # tui to communicate with k8s
+    #pkgs.krew # k8s tool to install k8s packages
     #pkgs.kubectl # official cli to communicate with k8s
-    pkgs.kubernetes-helm # helm package manager for k8s
-    pkgs.kubie # tool to manage multiple k8s configs
+    #pkgs.kubernetes-helm # helm package manager for k8s
+    #pkgs.kubie # tool to manage multiple k8s configs
     #pkgs.kubernetes
-    pkgs.lazygit # tui for git
-    pkgs.gitui # tui for git (but rustier)
-    pkgs.mongosh # next gen cli for mongodb
-    pkgs.mtr # my trace route...better than ping
-    pkgs.nats-top # NATS top commands
-    pkgs.natscli # official NATS cli
-    pkgs.neofetch # General system information
-    pkgs.neofetch # General system information
-    pkgs.neovim # THE editor
-    pkgs.nerd-font-patcher # add nerd fonts to your font
-    pkgs.nitrogen # fast and lightweight desktop background browser
-    pkgs.par # align paragraphs
-    pkgs.procs # rust alternative to ps -- it's so so
-    pkgs.rage # rust alternative to age encryption
-    pkgs.ripgrep # rg -- a much better grep
-    pkgs.socat # lib required to allow k8s port-forward to work
-    pkgs.spicedb-zed # zed cli client
-    pkgs.tokei # count your code quickly
-    pkgs.trunk # rust web server
-    pkgs.xclip # cli to communicate with the X11 clipboard
-    pkgs.xsv # awesome tool to work with csv files
-    pkgs.yarn # install node packages
-    pkgs.yed # yed High-quaility graph diagrams
+    #pkgs.lazygit # tui for git
+    gitui # tui for git (but rustier)
+    mongosh # next gen cli for mongodb
+    mtr # my trace route...better than ping
+    nats-top # NATS top commands
+    natscli # official NATS cli
+    neofetch # General system information
+    nerd-font-patcher # add nerd fonts to your font
+    nitrogen # fast and lightweight desktop background browser
+    par # align paragraphs
+    procs # rust alternative to ps -- it's so so
+    rage # rust alternative to age encryption
+    ripgrep # rg -- a much better grep
+    socat # lib required to allow k8s port-forward to work
+    spicedb-zed # zed cli client
+    tokei # count your code quickly
+    trunk # rust web server
+    xclip # cli to communicate with the X11 clipboard
+    xsv # awesome tool to work with csv files
+    yarn # install node packages
+    yed # yed High-quaility graph diagrams
 
     # RUST Tools
 
-    pkgs.cargo-cache # print size of dirs and remove dirs selectively
-    pkgs.cargo-nextest # better testing cli -- drop in replacement for cargo test
-    pkgs.cargo-update # update all rust packages installe with cargo
-    pkgs.cargo-watch # watch files change and run command
-    pkgs.rustup # the way to manage the rust language
-
-    # .NET Tools NOTE: the languages don't play nicely together
-
-    # pkgs.dotnet-sdk
-    # pkgs.dotnet-sdk_7
-    # pkgs.dotnet-sdk_8 # LTS dot net
-
-    # Gnome Tools
-    pkgs.gnomeExtensions.tray-icons-reloaded # Make sure tray icons appear -- seems like it's not working
+    cargo-cache # print size of dirs and remove dirs selectively
+    cargo-nextest # better testing cli -- drop in replacement for cargo test
+    cargo-update # update all rust packages installe with cargo
+    cargo-watch # watch files change and run command
+    rustup # the way to manage the rust language
 
     # Browsers
 
     # will override my username/history
     # TODO: may not need these. defaults are kinda good at updating
-    pkgs.microsoft-edge # Edge
-    pkgs.google-chrome # Google Chrome
-    pkgs.brave # Brave Browser
-    pkgs.firefox-devedition # dev firefox
+    microsoft-edge # Edge
+    (nixGLWrap pkgs.google-chrome)
+    brave # Brave Browser
+    (nixGLWrap pkgs.firefox-devedition)
 
     # Others
-    #pkgs.blueman # bluetooth GUI
-    pkgs.shutter # screenshotting tool
-    pkgs.ffmpegthumbnailer # videos thumbnailer
-    pkgs.font-manager # a font viewer
-    pkgs.libreoffice # alternative to ms office suite
-    pkgs.mongodb-compass # office mongodb GUI tool
-    pkgs.mongodb-tools # several mongodb cli tools
-    pkgs.policycoreutils # SELinux policy core utilities
-    pkgs.poppler # pdf renderer
-    pkgs.postgresql # pg database tools
-    pkgs.slack # slack
+    shutter # screenshotting tool
+    ffmpegthumbnailer # videos thumbnailer
+    font-manager # a font viewer
+    libreoffice # alternative to ms office suite
+    mongodb-compass # office mongodb GUI tool
+    mongodb-tools # several mongodb cli tools
+    policycoreutils # SELinux policy core utilities
+    poppler # pdf renderer
+    postgresql # pg database tools
+    slack # slack
     # pkgs.spotify # spotify
-    pkgs.ueberzugpp # utility to allow drawing images in the terminal
-    pkgs.unar # the unarchiver
-    # pkgs.unityhub # download and manage Unity projects/installations
-    pkgs.rofi # window switch / dmenu replacement
-    pkgs.rofimoji # emoji selector
+    ueberzugpp # utility to allow drawing images in the terminal
+    unar # the unarchiver
+    unityhub # download and manage Unity projects/installations
+    rofi # window switch / dmenu replacement
+    rofimoji # emoji selector
     # pkgs.gcc # gnu compilr collection
     # pkgs.openssl # secure communication (needed for making TUIs in rust)
+    xfce.thunar
+    xfce.thunar-archive-plugin
+    xfce.thunar-volman
+    xfce.tumbler # thunar thumbnails
 
-    #pkgs.pgadmin #pg admin
+    pgadmin4 # pg admin
+    # pkgs.pgadmin4-desktopmode
 
-    pkgs.nodejs # node :c
-    pkgs.nodejs.pkgs.pnpm # better node package manager
-    pkgs.git-open # easier git navigation
-    pkgs.feh # a lightweight image viewer
+    nodejs_20 # Explicitly use Node.js 20
+    nodePackages.pnpm # Ensure pnpm is installed via Nixpkgs
+    nodePackages.typescript-language-server # tsserver
+    nodePackages.eslint_d # ESLint daemon
+    nodePackages.prettier # Prettier for formatting
+    nixpkgs-fmt # Nix file formatter
+    #alejandra             # Alternative Nix formatter
+    statix # Nix linting
+    taplo # TOML formatter
+    # nodejs_20 # node :c
+    # nodejs.pkgs.pnpm # better node package manager
+    # NOTE: you'll need to run: xdg-settings set default-web-browser firefox-devedition.pgadmin4-desktop
+    # (or some variant), or else it defaults to brave
+    git-open # easier git navigation
+    http-server # run npm servers with this
+    feh # a lightweight image viewer
 
-    # LSP / Formatters
+    # LSP Tools
+    luajitPackages.luarocks # Lua LSP
+    nodePackages.typescript-language-server # JavaScript/TypeScript LSP
+    nodePackages.yaml-language-server # YAML LSP
+    efm-langserver # EFM language server for general formatting/linting
+    omnisharp-roslyn # .NET LSP
+    elixir-ls # Elixir Language Server
+    nil # nix LSP
 
-    pkgs.luajitPackages.luarocks # lua LSP
-    pkgs.nixfmt # nix formatter
-    pkgs.statix # nix lints & suggestions
-    pkgs.nixpkgs-fmt # another nix formatter
-    pkgs.nodePackages.prettier # code formatter
-    pkgs.nodePackages.tailwindcss # css generator
-    pkgs.nodePackages.typescript-language-server # javascript / typescript lsp
-    pkgs.nodePackages.yaml-language-server # yaml lsp
-    pkgs.omnisharp-roslyn # .NET lsp
-    pkgs.python39Packages.autopep8 # python lsp
-    pkgs.rnix-lsp # nix lsp
-    pkgs.shfmt # shell script formatter
-    pkgs.sqlfluff # sql formatter NOTE: pick your sql dialect
-    pkgs.stylua # lua formater
-    pkgs.uncrustify # .NET formatter
-    pkgs.R # software environment for the statistical programming langauge
-    pkgs.rstudio # tools/IDE for the R langauge
-    # xpkgs.ocaml # functional programming langauge
-    # pkgs.opam # pacakge manager for ocaml
-    # pkgs.go # google lang
-    pkgs.sqlfluff # sql formatter
-    pkgs.yamllint # a linter for yaml
-    pkgs.yaml-language-server # an lsp for yaml
-    pkgs.yamlfmt # formatting for yaml
-    pkgs.pgformatter # formatting for postgres
+    # Formatters
+    nixfmt-classic # Nix formatter
+    taplo # TOML formatter
+    nodePackages.prettier # Code formatter (technically a linter too :shrug:)
+    nodePackages.tailwindcss # CSS formatter/generator
+    stylua # Lua formatter
+    uncrustify # .NET formatter
+    sqlfluff # SQL formatter
+    yamlfmt # YAML formatter
+    pgformatter # Postgres SQL formatter
+    shfmt # Shell script formatter
 
-    # Environment Tools
-    # pkgs.i3 # tiling window manager
-    # pkgs.polybar # customizable status bar
+    # Linters
+    luajitPackages.luacheck # Lua linter
+    eslint_d # JavaScript/TypeScript linter (daemon version)
+    yamllint # YAML linter
+    sqlfluff # SQL linter (also doubles as a formatter)
+    statix # Nix linting and suggestions
+
+    # Dependencies for LSP/Tools
+    elixir # Elixir runtime
+    erlang # Required for Elixir tooling
+    inotify-tools # File system monitoring (used by some tools)
+
+    capnproto # protodef stuff
+
+    gimp # like photoshop, but Linux and FOSS
+
+    simplescreenrecorder # even simpler screen recording tool
   ];
 }

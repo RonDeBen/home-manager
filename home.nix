@@ -1,6 +1,5 @@
 { config, pkgs, ... }:
-let
-  inherit (config.lib) dag;
+let inherit (config.lib) dag;
 in {
   nixpkgs.config.allowUnfree = true;
 
@@ -28,10 +27,27 @@ in {
     #sessionPath = [ "/opt/firefox" ];
   };
 
+  # home.sessionVariables = {
+  #   BROWSER = "/home/ron.debenedetti/.nix-profile/bin/firefox-devedition";
+  #   EDITOR = "nvim";
+  # };
+
   home.sessionVariables = {
-    BROWSER = "/home/ron.debenedetti/.nix-profile/bin/firefox";
+    BROWSER = "/home/ron.debenedetti/.nix-profile/bin/firefox-devedition";
     EDITOR = "nvim";
+    PNPM_HOME = "${config.home.homeDirectory}/.local/share/pnpm";
+    XDG_CONFIG_HOME = "/home/ron.debenedetti/.config";
   };
+
+  xdg.configFile."pnpm/config.yaml".text = ''
+    global-bin-dir: /home/ron.debenedetti/.local/share/pnpm/bin
+  '';
+
+  # home.activation.pnpmConfig = lib.mkAfter {
+  #   text = ''
+  #     pnpm config set global-bin-dir /home/ron.debenedetti/.local/share/pnpm/bin --location user
+  #   '';
+  # };
 
   # You should not change this value, even if you update Home Manager. If you do
   # want to update the value, then make sure to first check the Home Manager

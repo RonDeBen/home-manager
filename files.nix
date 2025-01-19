@@ -86,17 +86,28 @@
         ${pkgs.gum}/bin/gum style --border normal --margin "1" --padding "1 2" --border-foreground 212 "Connecting to the Praeses VPN.."
 
         OPENCONNECT_PID=$(pidof openconnect)
-        if [ "$OPENCONNECT_PID" != "" ]
-        	then
-        	SUDO_ASKPASS=~/.local/bin/gum-askpass.sh sudo -A killall -SIGINT openconnect
+        if [ "$OPENCONNECT_PID" != "" ]; then
+          # Gracefully terminate any existing openconnect process
+          SUDO_ASKPASS=~/.local/bin/gum-askpass.sh sudo -A killall -SIGINT openconnect
         fi
 
-        #SUDO_ASKPASS=~/.local/bin/gum-askpass.sh sudo -A ${pkgs.openconnect}/bin/openconnect --config ~/.config/openconnect/config -u "$USER"
-        SUDO_ASKPASS=~/.local/bin/gum-askpass.sh sudo -A ${pkgs.openconnect}/bin/openconnect --config ~/.config/openconnect/config -u "$USER" --setuid="$USER"
+        # Ensure the script uses the correct HOME directory
+        export HOME=/home/$USER
 
-        ${pkgs.gum}/bin/gum spin -s monkey --title "Connecting to vpn" -- sudo systemctl restart sssd
+        if [ -x "$(command -v nscd)" ]; then
+          # Use this if nscd is installed
+          SUDO_ASKPASS=~/.local/bin/gum-askpass.sh sudo -A ${pkgs.openconnect}/bin/openconnect --config $HOME/.config/openconnect/config -u "$USER" --setuid="$USER"
+          ${pkgs.gum}/bin/gum spin -s monkey --title "Resetting NSCD" -- sudo systemctl restart nscd
+        else
+          # Use this if nscd is not installed
+          SUDO_ASKPASS=~/.local/bin/gum-askpass.sh sudo -A ${pkgs.openconnect}/bin/openconnect --config $HOME/.config/openconnect/config
+          ${pkgs.gum}/bin/gum spin -s monkey --title "Resetting SSSD" -- sudo systemctl restart sssd
+        fi
+
+        # Fix locale issues
+        export LANG=en_US.UTF-8
+        export LC_ALL=en_US.UTF-8
       '';
-
     };
 
     "vpn-disconnect" = {
@@ -110,12 +121,17 @@
         OPENCONNECT_PID=$(pidof openconnect)
         if [ "$OPENCONNECT_PID" != "" ]
         	then
+        	${pkgs.gum}/bin/gum spin -s globe --title "Disconnecting from vpn" -- sudo killall -SIGINT openconnect
         	SUDO_ASKPASS=~/.local/bin/gum-askpass.sh sudo -A echo ""
-        	${pkgs.gum}/bin/gum spin -s globe --title "Connecting to vpn" -- sudo killall -SIGINT openconnect
-        	${pkgs.gum}/bin/gum spin -s dot --title "Reseting SSSD" -- sudo systemctl restart sssd
+
+        	if [ -x "$(command -v nscd)" ]
+        		then
+        		${pkgs.gum}/bin/gum spin -s dot --title "Reseting NSCD" -- sudo systemctl restart nscd
+        		else
+        		${pkgs.gum}/bin/gum spin -s dot --title "Reseting SSSD" -- sudo systemctl restart sssd
+        	fi
         fi
       '';
-
     };
 
     # Standard config for vpn
