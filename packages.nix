@@ -20,19 +20,19 @@ let
     in wrappedPkg // { inherit (pkg) version; };
 
 in {
-  nixpkgs.overlays = [ (import ./configs/overlays/gifine/gifine.nix) ];
 
   # The home.packages option allows you to install Nix packages into your
   # environment.
   home.packages = with pkgs; [
-    vlc
-    tree-sitter
+    mgba # modern GBA emulator
+    # devkitpro
+    vlc # watch videos
+    tree-sitter # syntax tree parser
 
     # gifsicle #for optimizing gifs
     # ffmpeg # for creating mp4 and recording desktop
     # graphicsmagick #for creating gifs
     # slop # needed to select an area for screen recording
-    # gifine # make gifs from screen recordings
     # Custom Fonts
     nerd-fonts
 
@@ -150,19 +150,24 @@ in {
     http-server # run npm servers with this
     feh # a lightweight image viewer
 
+    # Languages
+    zig
+
     # LSP Tools
     luajitPackages.luarocks # Lua LSP
     nodePackages.typescript-language-server # JavaScript/TypeScript LSP
     nodePackages.yaml-language-server # YAML LSP
-    efm-langserver # EFM language server for general formatting/linting
+    # efm-langserver # EFM language server for general formatting/linting
     omnisharp-roslyn # .NET LSP
     elixir-ls # Elixir Language Server
     nil # nix LSP
+    zls # LSP for zig
 
     # Formatters
     nixfmt-classic # Nix formatter
     taplo # TOML formatter
     nodePackages.prettier # Code formatter (technically a linter too :shrug:)
+    prettierd # faster prettier
     nodePackages.tailwindcss # CSS formatter/generator
     stylua # Lua formatter
     uncrustify # .NET formatter
