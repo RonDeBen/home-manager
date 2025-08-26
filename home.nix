@@ -22,8 +22,8 @@ in {
   # Home Manager needs a bit of information about you and the
   # paths it should manage.
   home = {
-    username = "ron.debenedetti";
-    homeDirectory = "/home/ron.debenedetti/";
+    # username = "ron.debenedetti";
+    # homeDirectory = "/home/ron.debenedetti/";
     #sessionPath = [ "/opt/firefox" ];
   };
 
@@ -33,15 +33,15 @@ in {
   # };
 
   home.sessionVariables = {
-    BROWSER = "/home/ron.debenedetti/.nix-profile/bin/firefox-devedition";
+    # BROWSER = "/home/ron.debenedetti/.nix-profile/bin/firefox-devedition";
     EDITOR = "nvim";
     PNPM_HOME = "${config.home.homeDirectory}/.local/share/pnpm";
-    XDG_CONFIG_HOME = "/home/ron.debenedetti/.config";
+    # XDG_CONFIG_HOME = "/home/ron.debenedetti/.config";
   };
 
-  xdg.configFile."pnpm/config.yaml".text = ''
-    global-bin-dir: /home/ron.debenedetti/.local/share/pnpm/bin
-  '';
+  # xdg.configFile."pnpm/config.yaml".text = ''
+  #   global-bin-dir: /home/ron.debenedetti/.local/share/pnpm/bin
+  # '';
 
   # home.activation.pnpmConfig = lib.mkAfter {
   #   text = ''
@@ -52,7 +52,7 @@ in {
   # You should not change this value, even if you update Home Manager. If you do
   # want to update the value, then make sure to first check the Home Manager
   # release notes.
-  home.stateVersion = "23.05"; # Please read the comment before changing.
+  # home.stateVersion = "23.05"; # Please read the comment before changing.
 
   imports = [ ./files.nix ./packages.nix ./services.nix ./programs.nix ];
 }

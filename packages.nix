@@ -1,11 +1,11 @@
-{ pkgs, ... }:
+{ pkgs, nixgl, ... }:
 
 let
   nerd-fonts = pkgs.callPackage ./nerdfonts { };
 
-  nixGL = import <nixgl> { };
+  # nixGL = import <nixgl> { };
+  nixGL = nixgl.packages.${pkgs.system};
 
-  # Define the wrapper function for applications requiring nixGL
   nixGLWrap = pkg:
     let
       bin = "${pkg}/bin";
@@ -87,7 +87,7 @@ in {
     xclip # cli to communicate with the X11 clipboard
     xsv # awesome tool to work with csv files
     yarn # install node packages
-    yed # yed High-quaility graph diagrams
+    # yed # yed High-quaility graph diagrams
 
     # RUST Tools
 
@@ -101,9 +101,9 @@ in {
 
     # will override my username/history
     # TODO: may not need these. defaults are kinda good at updating
-    microsoft-edge # Edge
+    # microsoft-edge # Edge
     (nixGLWrap pkgs.google-chrome)
-    brave # Brave Browser
+    # brave # Brave Browser
     (nixGLWrap pkgs.firefox-devedition)
 
     # Others
@@ -193,5 +193,7 @@ in {
     gimp # like photoshop, but Linux and FOSS
 
     simplescreenrecorder # even simpler screen recording tool
+    openconnect # connect to GlobalConnect vpn
+    globalprotect-openconnect
   ];
 }

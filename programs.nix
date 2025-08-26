@@ -1,6 +1,6 @@
-{ pkgs, ... }:
+{ pkgs, nixgl, ... }:
 let
-  nixGL = import <nixgl> { };
+  nixGL = nixgl.packages.${pkgs.system};
 
   nixGLWrap = pkg:
     let
@@ -126,6 +126,7 @@ in {
         };
       };
       cursor = { style = { shape = "Beam"; }; };
+      env = { WINIT_UNIX_BACKEND = "wayland"; };
     };
   };
 
@@ -254,6 +255,7 @@ in {
           eval $(ssh-agent -s)
           set -x SSH_AUTH_SOCK $SSH_AUTH_SOCK
       end
+      set -l bobbin $XDG_DATA_HOME/bob/nvim-bin
 
       # Add the key using keychain
       if test -z "$SSH_AUTH_SOCK"
@@ -265,7 +267,7 @@ in {
         set -gx PATH $PNPM_HOME/bin $HOME/.local/bin $HOME/.yarn/bin $HOME/.cargo/bin $PATH
         set -gx SHELL ${pkgs.fish}/bin/fish
         set -gx PATH $HOME/.nix-profile/bin $PATH
-        set -gx PATH /home/ron.debenedetti/.nix-profile/bin $PATH
+        set -gx PATH /home/rondeben/.nix-profile/bin $PATH
         set -gx PATH /usr/bin $PATH
 
         # Monokai Fish shell theme
