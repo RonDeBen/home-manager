@@ -141,8 +141,8 @@ in {
     difftastic.enable = true;
 
     extraConfig = {
-      commit = { gpgSign = "true"; };
-      user = { signingKey = "F2B5049310B0CB9E"; };
+      # commit = { gpgSign = "true"; };
+      # user = { signingKey = "F2B5049310B0CB9E"; };
       color = {
         ui = "auto";
         branch = {
